@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Audit Log — Disciplina Blindada®</title>
+<link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" />
+
+<!-- Estilos -->
+<style>
+  :root{
+    --azul-escuro: #0A2540;
+    --azul-claro: #E6F0FA;
+    --laranja: #F77F00;
+    --verde: #008000;
+    --cinza-claro: #F5F5F5;
+    --texto: #111;
+    --muted: #666;
+    --paper-width: 210mm; /* A4 width for printing */
+    --paper-height: 297mm;
+  }
+
+  /* Página / impressão */
+  html,body{
+    margin:0;
+    padding:0;
+    background: #f2f4f7;
+    font-family: "Inter", "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color:var(--texto);
+  }
+
+  .container{
+    width: min(1000px, calc(100% - 40px));
+    margin: 28px auto;
+    background: #fff;
+    box-shadow: 0 8px 30px rgba(10,37,64,0.08);
+    border-radius: 10px;
+    padding: 28px;
+    box-sizing: border-box;
+  }
+
+  /* Cabeçalho */
+  header.header{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:18px;
+  }
+  .logo{
+    width:68px;
+    height:68px;
+    border-radius:10px;
+    background: linear-gradient(135deg,var(--laranja),#0077B6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-weight:700;
+    font-family: "Montserrat", sans-serif;
+    box-shadow: 0 6px 18px rgba(7, 45, 88, 0.12);
+  }
+  .title-block h1{
+    margin:0;
+    font-size:20px;
+    color:var(--azul-escuro);
+    letter-spacing:0.2px;
+  }
+  .title-block p{
+    margin:4px 0 0 0;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  /* Info top */
+  .meta{
+    display:flex;
+    gap:12px;
+    margin:10px 0 22px 0;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .chip{
+    background:var(--cinza-claro);
+    color:var(--azul-escuro);
+    padding:8px 12px;
+    border-radius:999px;
+    font-weight:600;
+    font-size:13px;
+  }
+  .selo{
+    margin-left:auto;
+    background: linear-gradient(90deg,var(--verde),#2fb36f);
+    color:#fff;
+    padding:8px 12px;
+    border-radius:8px;
+    font-weight:700;
+    font-size:13px;
+  }
+
+  /* Tabela principal */
+  .table-wrap{
+    overflow:auto;
+    border-radius:8px;
+    border: 1px solid #eceff3;
+  }
+  table.audit{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+  }
+  table.audit thead th{
+    background:var(--azul-escuro);
+    color:#fff;
+    font-weight:700;
+    padding:12px 10px;
+    text-align:center;
+    font-size:13px;
+    vertical-align:middle;
+  }
+  table.audit tbody td{
+    padding:10px 8px;
+    border-bottom:1px solid #f1f4f7;
+    vertical-align:middle;
+    font-size:13px;
+  }
+
+  /* zebra */
+  table.audit tbody tr:nth-child(even) td{
+    background: #fbfdff;
+  }
+  table.audit tbody tr:nth-child(odd) td{
+    background: #ffffff;
+  }
+
+  /* Coluna hora */
+  .hora{
+    width:90px;
+    font-weight:600;
+    color:var(--azul-escuro);
+    text-align:center;
+  }
+
+  /* Inputs */
+  .atividade-input, .nota-input{
+    width:100%;
+    border:1px solid #e7ecf2;
+    border-radius:6px;
+    padding:8px 10px;
+    font-size:13px;
+    box-sizing:border-box;
+    background:transparent;
+  }
+  .atividade-input:focus, .nota-input:focus{
+    outline: 3px solid rgba(7,37,88,0.06);
+  }
+
+  select.classif{
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #e7ecf2;
+    background: #fff;
+    font-weight:600;
+  }
+
+  /* cores conforme valor (apenas estilo visual) */
+  .class-vazamento{ background:#ffecec; color:#b00000; }
+  .class-produtivo{ background:#e9fbef; color:#006b2f; }
+  .class-neutro{ background:#f5f7fa; color:#666; }
+
+  /* rodapé */
+  .footer{
+    margin-top:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .footer .note{
+    background: linear-gradient(90deg,#fff,#fff);
+    padding:8px 12px;
+    border-radius:8px;
+  }
+
+  /* ações */
+  .actions{
+    margin-top:14px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .btn{
+    padding:10px 14px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-weight:700;
+    color:white;
+    background: linear-gradient(90deg,var(--laranja),#0077B6);
+    box-shadow: 0 6px 18px rgba(7, 45, 88, 0.12);
+  }
+  .btn.ghost{
+    background:transparent;
+    color:var(--azul-escuro);
+    border:1px solid #e6eef8;
+    box-shadow:none;
+    font-weight:600;
+  }
+
+  /* print rules — A4 */
+  @media print{
+    body{ background:white; }
+    .container{ box-shadow:none; border-radius:0; margin:0; width:100%; padding:18mm; }
+    .actions, .selo { display:none; }
+    header.header .logo{ display:none; }
+    .footer{ position:fixed; bottom:10mm; left:18mm; right:18mm; background:transparent; }
+    table.audit{ page-break-inside:auto; }
+    tr{ page-break-inside:avoid; page-break-after:auto; }
+  }
+
+  /* responsividade */
+  @media (max-width:820px){
+    .container{ padding:18px; width:calc(100% - 36px); }
+    table.audit{ min-width:700px; }
+  }
+
+  /* responsividade aprimorada */
+  @media (max-width: 700px) {
+  .container {
+    padding: 8px;
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+  header.header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .logo {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2em;
+  }
+  .title-block h1 {
+    font-size: 16px;
+  }
+  .title-block p {
+    font-size: 12px;
+  }
+  .meta {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .chip, .selo {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  .table-wrap {
+    border-radius: 0;
+    border: none;
+    overflow-x: auto;
+  }
+  table.audit {
+    min-width: 600px;
+    font-size: 12px;
+  }
+  table.audit thead th, table.audit tbody td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .footer .note {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .btn, .btn.ghost {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 14px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container" role="main">
+  <header class="header">
+    <div class="logo">DB</div>
+    <div class="title-block">
+      <h1>Audit Log — Seu Raio-X Diário</h1>
+      <p>Registre cada bloco de tempo e descubra onde o seu dia realmente vai.</p>
+    </div>
+
+    <div class="selo" title="+300 alunos">+300 alunos</div>
+  </header>
+
+  <div class="meta">
+    <div class="chip">Formato: 30 minutos</div>
+    <div class="chip">Versão: Premium</div>
+    <div class="chip">Compatível: imprimir / exportar PDF</div>
+  </div>
+
+  <div class="table-wrap" aria-hidden="false">
+    <table class="audit" role="table" aria-label="Audit Log">
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>Atividade</th>
+          <th>Classificação</th>
+          <th>Nota rápida</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Linhas geradas: 06:00 até 23:30 (30 min) -->
+        <!-- Cada linha tem input/textarea e select para fácil preenchimento -->
+        <!-- Você pode copiar mais linhas se necessário -->
+        <!-- Exemplo de linhas -->
+        <tr>
+          <td class="hora">06:00</td>
+          <td><input class="atividade-input" type="text" placeholder="Descreva a atividade" /></td>
+          <td>
+            <select class="classif">
+              <option value="">Selecione</option>
+              <option class="class-produtivo" value="produtivo">Produtivo</option>
+              <option class="class-vazamento" value="vazamento">Vazamento</option>
+              <option class="class-neutro" value="neutro">Neutro</option>
+            </select>
+          </td>
+          <td><input class="nota-input" type="text" placeholder="Observação rápida" /></td>
+        </tr>
+        <!-- Repita para cada horário -->
+        <tr><td class="hora">06:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">07:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">07:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">08:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">08:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">09:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">09:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">10:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">10:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">11:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">11:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">12:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">12:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">13:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">13:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">14:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">14:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">15:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">15:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">16:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">16:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">17:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">17:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">18:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">18:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">19:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">19:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">20:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">20:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">21:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">21:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">22:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">22:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">23:00</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+        <tr><td class="hora">23:30</td><td><input class="atividade-input" type="text" /></td><td><select class="classif"><option value="">Selecione</option><option class="class-produtivo" value="produtivo">Produtivo</option><option class="class-vazamento" value="vazamento">Vazamento</option><option class="class-neutro" value="neutro">Neutro</option></select></td><td><input class="nota-input" type="text" /></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="window.print()">Imprimir / Exportar PDF</button>
+    <button class="btn ghost" onclick="location.reload()">Limpar tudo</button>
+  </div>
+
+  <div class="footer">
+    <div class="note">
+      Disciplina Blindada® — Audit Log Diário. Para melhor resultado, preencha ao longo do dia e revise antes de dormir.
+    </div>
+    <div>
+      &copy; 2025 Disciplina Blindada®. Todos os direitos reservados.
+    </div>
+  </div>
+</div>
+</body>
+</html>
